@@ -1,0 +1,55 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+
+}
+
+model User {
+  id          String       @id @default(uuid())
+  email       String       @unique
+  username    String       @unique
+  password    String
+  createdAt   DateTime     @default(now())
+
+  submissions Submission[]
+}
+
+model Problem {
+  id          String       @id @default(uuid())
+  title       String
+  description String
+  difficulty  String
+  timeLimit   Float
+  memoryLimit Int
+  createdAt   DateTime     @default(now())
+  submissions Submission[]
+  testCases     TestCase[]
+}
+
+model TestCase {
+  id             String   @id @default(uuid())
+  problemId      String
+  problem        Problem  @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  input          String   // e.g. "2 3"
+  expectedOutput String   // e.g. "5"
+  createdAt      DateTime @default(now())
+}
+
+model Submission {
+  id          String   @id @default(uuid())
+  code        String
+  language    String
+  status      String   @default("Queued")
+  timeUsed    Float?
+  memoryUsed  Int?
+  createdAt   DateTime @default(now())
+
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+
+  problemId   String
+  problem     Problem  @relation(fields: [problemId], references: [id])
+}
